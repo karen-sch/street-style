@@ -1,0 +1,54 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+	<title>StreetStyle</title>
+	<script src="//cdn.jsdelivr.net/phaser/2.4.3/phaser.min.js"></script>
+	<script src="assets.json"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var imagedata = JSON.parse(data);
+var game = new Phaser.Game(400, 700, Phaser.AUTO, '', { preload: preload, create: create, update: update }, true, false);
+
+function getRandomImage(object){
+	var index = Math.floor((Math.random() * object.length));
+	return object[index]["1"];
+}
+
+function preload() {
+
+	 game.load.image('body', 'images/body/' + getRandomImage(imagedata["body"]));
+	 game.load.image('hair', 'images/hair/' + getRandomImage(imagedata["hair"]));	 
+	 game.load.image('pants', 'images/pants/' + getRandomImage(imagedata["pants"]));
+	 game.load.image('top', 'images/tops/' + getRandomImage(imagedata["tops"]));
+	 game.load.image('shoes', 'images/shoes/' + getRandomImage(imagedata["shoes"]));
+}
+
+function create() {
+	var sprite = [];
+	sprite[0] = game.add.sprite(0, 0, 'body');
+	sprite[1] = game.add.sprite(0, 0, 'hair');	
+	sprite[2] = game.add.sprite(0, 0, 'pants');
+	sprite[3] = game.add.sprite(0, 0, 'top');
+	sprite[4] = game.add.sprite(0, 0, 'shoes');
+
+	for (var i = 0; i < sprite.length; i ++){
+		sprite[i].scale.setTo(3.5, 3.5);
+	}
+}
+
+function update() {
+}
+
+</script>
+
+</body>
+</html>
