@@ -18,31 +18,29 @@
 var imagedata = JSON.parse(data);
 var game = new Phaser.Game(400, 700, Phaser.AUTO, '', { preload: preload, create: create, update: update }, true, false);
 
-function getRandomImage(object){
+function createRandomSprite(type){
+	object = imagedata[type];
 	var index = Math.floor((Math.random() * object.length));
-	return object[index]["1"];
+	var frame1 = type + '/' + (index + 1) + '/' + object[index]["1"];
+	var frame2 = type + '/' + (index + 1) + '/' + object[index]["2"];
+	var sprite = game.add.sprite(0, 0, 'fashion', frame1);
+	sprite.scale.setTo(3.5, 3.5);
+	sprite.animations.add('walk', [frame1, frame2], 2.5, true, false);
+	sprite.animations.play('walk');
 }
 
 function preload() {
-
-	 game.load.image('body', 'images/body/' + getRandomImage(imagedata["body"]));
-	 game.load.image('hair', 'images/hair/' + getRandomImage(imagedata["hair"]));	 
-	 game.load.image('pants', 'images/pants/' + getRandomImage(imagedata["pants"]));
-	 game.load.image('top', 'images/tops/' + getRandomImage(imagedata["tops"]));
-	 game.load.image('shoes', 'images/shoes/' + getRandomImage(imagedata["shoes"]));
+	game.load.atlasJSONHash('fashion', 'images/fashion.png', 'images/fashion.json');
 }
 
 function create() {
-	var sprite = [];
-	sprite[0] = game.add.sprite(0, 0, 'body');
-	sprite[1] = game.add.sprite(0, 0, 'hair');	
-	sprite[2] = game.add.sprite(0, 0, 'pants');
-	sprite[3] = game.add.sprite(0, 0, 'top');
-	sprite[4] = game.add.sprite(0, 0, 'shoes');
-
-	for (var i = 0; i < sprite.length; i ++){
-		sprite[i].scale.setTo(3.5, 3.5);
-	}
+	
+	createRandomSprite('body');
+	createRandomSprite('hair');
+	createRandomSprite('pants');
+	createRandomSprite('tops');
+	createRandomSprite('shoes');
+	
 }
 
 function update() {
