@@ -17,26 +17,56 @@
 
 var imagedata = JSON.parse(data);
 var game = new Phaser.Game(400, 700, Phaser.AUTO, '', { preload: preload, create: create, update: update }, true, false);
-var sprites = [];
+var npcs = [];
+var initialScale = 0;
+var initialX = 0;
+var initialY = -200;
+var hover = false;
 
 function createRandomSprite(type){
 	object = imagedata[type];
 	var index = Math.floor((Math.random() * object.length));
 	var frame1 = type + '/' + (index + 1) + '/' + object[index]["1"];
 	var frame2 = type + '/' + (index + 1) + '/' + object[index]["2"];
-	var sprite = game.add.sprite(0, -700, 'fashion', frame1);
-	sprite.scale.setTo(3.5, 3.5);
+	var sprite = game.add.sprite(initialX, initialY, 'fashion', frame1);
+	sprite.scale.setTo(initialScale, initialScale);
 	sprite.animations.add('walk', [frame1, frame2], 2.5, true, false);
 	sprite.animations.play('walk');
 	return sprite;
 }
 
-function newSprite(){
-	sprites[0] = createRandomSprite('body');
-	sprites[1] = createRandomSprite('hair');
-	sprites[2] = createRandomSprite('pants');
-	sprites[3] = createRandomSprite('tops');
-	sprites[4] = createRandomSprite('shoes');
+
+function newNPC(){
+	var spriteGroup = game.add.group();
+	spriteGroup.add(createRandomSprite('body'));
+	spriteGroup.add(createRandomSprite('hair'));
+
+	var random = Math.floor((Math.random() * 2));
+	if (random == 0){
+		spriteGroup.add(createRandomSprite('jumpsuits'));
+	}
+	else {
+		spriteGroup.add(createRandomSprite('pants'));
+		spriteGroup.add(createRandomSprite('tops'));		
+	}
+
+	spriteGroup.add(createRandomSprite('shoes'));
+	spriteGroup.forEach(function(item) {
+				item.inputEnabled = true;
+				item.input.useHandCursor = true; 
+			   item.events.onInputOver.add(function(i){
+											hover = true;
+										}, this);
+				item.events.onInputOut.add(function(i){
+											hover = false;
+										}, this);			   
+			}, this);
+	var npc = {};
+	npc.x = initialX;
+	npc.y = initialY;
+	npc.scale = initialScale;
+	npc.sprites = spriteGroup;
+	return npc;
 }
 
 function preload() {
@@ -44,16 +74,25 @@ function preload() {
 }
 
 function create() {	
-	newSprite();	
+	
+	npcs.push(newNPC());	
 }
 
 function update() {
-	for (var i=0; i < sprites.length; i++){
-		sprites[i].y += 1;
-	}
+	if (!hover){
+		for (var i=0; i < npcs.length; i++){
+			npcs[i].y += 0.75;
+			var scale = (((npcs[i].y)/700)*(1.5))+3;
+			npcs[i].sprites.forEach(function(item) {
+			   item.y = npcs[i].y;
+			   item.scale.setTo(scale, scale);
+			}, this);
+		}	
 
-	if (sprites[0].y > 700){
-		newSprite();
+		if (npcs[0].y > 700){
+			npcs.shift();
+			npcs.push(newNPC());
+		}
 	}
 }
 
