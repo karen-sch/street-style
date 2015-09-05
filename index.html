@@ -3,25 +3,34 @@
 <head> 
 	<meta charset="UTF-8" />
 	<title>StreetStyle</title>
+	<link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
 	<script src="//cdn.jsdelivr.net/phaser/2.4.3/phaser.min.js"></script>
 	<script src="assets.json"></script>
     <style type="text/css">
         body {
             margin: 0;
+            font-family: 'Press Start 2P', cursive;
+        }
+        canvas {
+        	width: 400px;
+        	height: 700px;
+        	border-width: 1px;
+        	border-color: black;
         }
     </style>
 </head>
 <body>
-
+<div id="game"></div>
 <script type="text/javascript">
 
 var imagedata = JSON.parse(data);
-var game = new Phaser.Game(400, 700, Phaser.AUTO, '', { preload: preload, create: create, update: update }, true, false);
+var game = new Phaser.Game(400, 700, Phaser.AUTO, 'game', { preload: preload, create: create, update: update }, true, false);
 var npcs = [];
 var initialScale = 0;
 var initialX = 0;
 var initialY = -200;
 var hover = false;
+var emojiCursor;
 
 function createRandomSprite(type){
 	object = imagedata[type];
@@ -56,10 +65,13 @@ function newNPC(){
 				item.input.useHandCursor = true; 
 			   item.events.onInputOver.add(function(i){
 											hover = true;
+											emojiCursor.visible = true;
 										}, this);
 				item.events.onInputOut.add(function(i){
 											hover = false;
-										}, this);			   
+											emojiCursor.visible = false;
+										}, this);
+				item.events.onInputDown.add(clickOnStyle, this);			   
 			}, this);
 	var npc = {};
 	npc.x = initialX;
@@ -69,13 +81,24 @@ function newNPC(){
 	return npc;
 }
 
+function clickOnStyle(){
+	text = game.add.text(275, 400, "I love your\noutfit!");
+    text.anchor.setTo(0.5);
+
+    text.font = 'Press Start 2P';
+    text.fontSize = 20;
+}
+
 function preload() {
 	game.load.atlasJSONHash('fashion', 'images/fashion.png', 'images/fashion.json');
+	game.load.spritesheet('emojis', 'images/emojis/sheet_apple_32.png', 32, 32, 1186);
 }
 
 function create() {	
 	
 	npcs.push(newNPC());	
+	emojiCursor = game.add.sprite(0, 0, 'emojis', 93);
+	emojiCursor.visible = false;
 }
 
 function update() {
@@ -93,6 +116,10 @@ function update() {
 			npcs.shift();
 			npcs.push(newNPC());
 		}
+	}
+	else {
+		emojiCursor.x = game.input.x;
+		emojiCursor.y = game.input.y;
 	}
 }
 
