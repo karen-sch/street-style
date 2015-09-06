@@ -4,121 +4,208 @@
 	<meta charset="UTF-8" />
 	<title>StreetStyle</title>
 	<script src="//cdn.jsdelivr.net/phaser/2.4.3/phaser.min.js"></script>
+	<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script src="assets.json"></script>
-    <style type="text/css">
-        body {
-            margin: 0;
-        }
-        canvas {
-        	width: 400px;
-        	height: 700px;
-        	border-width: 1px;
-        	border-color: black;
-        }
-    </style>
+	<style type="text/css">
+		@font-face {
+			font-family: Superscript;
+			src: url(SUPERSCR.TTF);
+			font-weight: normal;
+		}
+		body {
+			margin: 0;
+		}
+		h1 {
+			font-weight: normal;
+			font-family: Superscript;
+		}
+		#game {
+			border-width: 1px;
+			border-color: black;
+			border-style: solid;
+			margin: 5px;
+			position: absolute;
+		}
+		#blog {
+			font-family: Courier, monospace;
+			font-size: 9pt;
+			font-weight: normal;
+			border-width: 1px;
+			border-color: black;
+			border-style: solid;
+			margin: 5px;
+			position: absolute;
+			display: none;
+			width: 400px;
+			height: 700px;
+			overflow: scroll;
+		}
+		#toggle_blog {
+			position: absolute;
+			left:400px;
+		}
+		img {
+			width: 159px;
+			height: 380px;
+			image-rendering: pixelated;
+		}
+	</style>
 </head>
 <body>
-<div id="game"></div>
-<script type="text/javascript">
+	<div id="game"></div>
+	<div id ="blog"></div>
+	<button id="toggle_blog">Blog</button>
+	<script type="text/javascript">
 
-var imagedata = JSON.parse(data);
-var game = new Phaser.Game(400, 700, Phaser.AUTO, 'game', { preload: preload, create: create, update: update }, true, false);
-var npcs = [];
-var initialScale = 0;
-var initialX = 0;
-var initialY = -200;
-var hover = false;
-var emojiCursor;
+		var imagedata = JSON.parse(data);
+		var width = 400;
+		var height = 700;
+		var menuHeight = 75;
+		var menu;
+		var game = new Phaser.Game(width, height, Phaser.AUTO, 'game', { preload: preload, create: create, update: update, render: render }, true, false);
+		var npc = {};
+		var front_layer;
+		var back_layer;
+		var initialScale = 0;
+		var initialX = 0;
+		var initialY = -200;
+		var hover = false;
+		var emojiCursor;
+		var lastTop;
+		var lastPants;
+		var lastJumpsuit;
 
-function createRandomSprite(type){
-	object = imagedata[type];
-	var index = Math.floor((Math.random() * object.length));
-	var frame1 = type + '/' + (index + 1) + '/' + object[index]["1"];
-	var frame2 = type + '/' + (index + 1) + '/' + object[index]["2"];
-	var sprite = game.add.sprite(initialX, initialY, 'fashion', frame1);
-	sprite.scale.setTo(initialScale, initialScale);
-	sprite.animations.add('walk', [frame1, frame2], 2.5, true, false);
-	sprite.animations.play('walk');
-	return sprite;
-}
+		$( "#toggle_blog" ).click(function() {
+			$( "#blog" ).toggle();
+			$( "#game" ).toggle();
+		});
+
+		function createRandomSprite(type){
+			object = imagedata[type];
+			var index = Math.floor((Math.random() * object.length));
+			var frame1 = type + '/' + (index + 1) + '/' + object[index]["1"];
+			var frame2 = type + '/' + (index + 1) + '/' + object[index]["2"];
+			var sprite = back_layer.create(initialX, initialY, 'fashion', frame1);
+			sprite.scale.setTo(initialScale, initialScale);
+			sprite.animations.add('walk', [frame1, frame2], 2.5, true, false);
+			sprite.animations.play('walk');
+			sprite.name = type;
+			return sprite;
+		}
 
 
-function newNPC(){
-	var spriteGroup = game.add.group();
-	spriteGroup.add(createRandomSprite('body'));
-	spriteGroup.add(createRandomSprite('hair'));
+		function newNPC(){
+			var npc = {};
+			var spriteGroup = game.add.group();
+			back_layer.add(spriteGroup);
+			spriteGroup.add(createRandomSprite('body'));
+			spriteGroup.add(createRandomSprite('hair'));
 
-	var random = Math.floor((Math.random() * 2));
-	if (random == 0){
-		spriteGroup.add(createRandomSprite('jumpsuits'));
-	}
-	else {
-		spriteGroup.add(createRandomSprite('pants'));
-		spriteGroup.add(createRandomSprite('tops'));		
-	}
+			var random = Math.floor((Math.random() * 2));
+			if (random == 0){
+				npc.hasJumpsuit = true;
+				spriteGroup.add(createRandomSprite('jumpsuits'));
+			}
+			else {
+				npc.hasJumpsuit = false;
+				spriteGroup.add(createRandomSprite('pants'));
+				spriteGroup.add(createRandomSprite('tops'));		
+			}
 
-	spriteGroup.add(createRandomSprite('shoes'));
-	spriteGroup.forEach(function(item) {
+			spriteGroup.add(createRandomSprite('shoes'));
+			spriteGroup.forEach(function(item) {
 				item.inputEnabled = true;
 				item.input.useHandCursor = true; 
-			   item.events.onInputOver.add(function(i){
-											hover = true;
-											emojiCursor.visible = true;
-										}, this);
-				item.events.onInputOut.add(function(i){
-											hover = false;
-											emojiCursor.visible = false;
-										}, this);
+				item.events.onInputOver.add(function(){
+					hover = true;
+					emojiCursor.visible = true;
+				}, this);
+				item.events.onInputOut.add(function(){
+					hover = false;
+					emojiCursor.visible = false;
+				}, this);
 				item.events.onInputDown.add(clickOnStyle, this);			   
 			}, this);
-	var npc = {};
-	npc.x = initialX;
-	npc.y = initialY;
-	npc.scale = initialScale;
-	npc.sprites = spriteGroup;
-	return npc;
-}
-
-function clickOnStyle(){
-	text = game.add.bitmapText(175, 200, "superscript", "I love your\noutfit!", 30);
-}
-
-function preload() {
-	game.load.atlasJSONHash('fashion', 'images/fashion.png', 'images/fashion.json');
-	game.load.spritesheet('emojis', 'images/emojis/sheet_apple_32.png', 32, 32, 1186);
-	game.load.bitmapFont('superscript', 'font/superscript.png', 'font/superscript.fnt');
-}
-
-function create() {	
-	
-	npcs.push(newNPC());	
-	emojiCursor = game.add.sprite(0, 0, 'emojis', 93);
-	emojiCursor.visible = false;
-}
-
-function update() {
-	if (!hover){
-		for (var i=0; i < npcs.length; i++){
-			npcs[i].y += 0.75;
-			var scale = (((npcs[i].y)/700)*(1.5))+3;
-			npcs[i].sprites.forEach(function(item) {
-			   item.y = npcs[i].y;
-			   item.scale.setTo(scale, scale);
-			}, this);
-		}	
-
-		if (npcs[0].y > 700){
-			npcs.shift();
-			npcs.push(newNPC());
+			
+			npc.x = initialX;
+			npc.y = initialY;
+			npc.scale = initialScale;
+			npc.sprites = spriteGroup;
+			return npc;
 		}
-	}
-	else {
-		emojiCursor.x = game.input.x;
-		emojiCursor.y = game.input.y;
-	}
-}
 
-</script>
+		function clickOnStyle(){
+			text = new Phaser.BitmapText(game, 175, 200, "superscript", "I love your\noutfit!", 30);
+			front_layer.add(text);
+			var bitmap = new Phaser.BitmapData(game, "bitmap", 78, 190);
+			npc.sprites.forEach(function(item) {
+				item.y = 0;
+				item.x = 0;
+				item.scale.setTo(1, 1);
+				bitmap.draw(item);
+				item.y = npc.y;
+				item.x = npc.x;
+				item.scale.setTo(npc.scale, npc.scale);
+				if (item.name == "jumpsuits"){
+					lastJumpsuit = item;
+
+				} else if (item.name == "tops"){
+					lastTop = item;
+
+				} else if (item.name == "pants"){
+					lastPants = item;
+
+				}
+			}, this);
+			bitmap.update();
+			var data = bitmap.baseTexture.source;
+			var test = data.toDataURL("image/png");
+			$("#blog").append("<div><h1>New entry!</h1><h3>Posted on " + new Date($.now()) + "</h3><img src='" + test + "' /></div>");
+		}
+
+		function preload() {
+			game.load.atlasJSONHash('fashion', 'images/fashion.png', 'images/fashion.json');
+			game.load.spritesheet('emojis', 'images/emojis/sheet_apple_32.png', 32, 32, 1186);
+			game.load.bitmapFont('superscript', 'font/superscript.png', 'font/superscript.fnt');
+			game.load.image('title','images/title.png');
+		}
+
+		function create() {	
+
+			back_layer = game.add.group();
+			front_layer = game.add.group();	
+			emojiCursor = front_layer.create(0, 0, 'emojis', 93);
+			emojiCursor.visible = false;
+			menu = front_layer.create(0, 0, 'title');
+			npc= newNPC();
+		}
+
+		function update() {
+			if (!hover){				
+				npc.y += 0.75;
+				npc.scale = (((npc.y)/700)*(1.5))+3;
+				npc.sprites.forEach(function(item) {
+					item.y = npc.y;
+					item.scale.setTo(npc.scale, npc.scale);
+				}, this);
+
+
+				if (npc.y > 700){
+
+					npc = newNPC();
+				}
+			}
+			else {
+				emojiCursor.x = game.input.x;
+				emojiCursor.y = game.input.y;
+			}
+		}
+
+		function render() {
+			
+		}
+
+	</script>
 
 </body>
 </html>
