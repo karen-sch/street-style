@@ -13,10 +13,24 @@ $( document ).ready(function() {
 	var writing = false;
 	var fashionPhrases = ["Tres chic!", "So stylish", "<3 this look", "Cool outfit!", "Very hip"];
 
-	$("#toggle_blog").click(function() {
-		$( "#blog, #game" ).toggle();
-		$("#toggle_blog").text($("#blog").is(":visible") ? "Street" : "Blog");
+	$("#toggle_street").click(function() {
+		$("#blog").hide();
+		$("#credits").hide();
+		$("#game").show()
+	});
 
+	$("#toggle_blog").click(function() {
+		
+		$("#game").hide();
+		$("#credits").hide();
+		$("#blog").show()
+
+	});
+
+	$("#toggle_credits").click(function() {
+		$("#game").hide();
+		$("#blog").hide();
+		$("#credits").show();
 	});
 
 	function createRandomSprite(type){

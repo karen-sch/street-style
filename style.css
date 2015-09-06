@@ -30,7 +30,7 @@ h1, h2 {
 	width: 400px;
 	height: 600px;
 }
-#blog {
+#blog, #credits {
 	font-family: Courier, monospace;
 	font-size: 9pt;
 	font-weight: normal;
