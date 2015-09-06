@@ -3,13 +3,11 @@
 <head> 
 	<meta charset="UTF-8" />
 	<title>StreetStyle</title>
-	<link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
 	<script src="//cdn.jsdelivr.net/phaser/2.4.3/phaser.min.js"></script>
 	<script src="assets.json"></script>
     <style type="text/css">
         body {
             margin: 0;
-            font-family: 'Press Start 2P', cursive;
         }
         canvas {
         	width: 400px;
@@ -82,16 +80,13 @@ function newNPC(){
 }
 
 function clickOnStyle(){
-	text = game.add.text(275, 400, "I love your\noutfit!");
-    text.anchor.setTo(0.5);
-
-    text.font = 'Press Start 2P';
-    text.fontSize = 20;
+	text = game.add.bitmapText(175, 200, "superscript", "I love your\noutfit!", 30);
 }
 
 function preload() {
 	game.load.atlasJSONHash('fashion', 'images/fashion.png', 'images/fashion.json');
 	game.load.spritesheet('emojis', 'images/emojis/sheet_apple_32.png', 32, 32, 1186);
+	game.load.bitmapFont('superscript', 'font/superscript.png', 'font/superscript.fnt');
 }
 
 function create() {	
