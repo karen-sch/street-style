@@ -1,0 +1,74 @@
+@font-face {
+	font-family: Superscript;
+	src: url(font/SUPERSCR.TTF);
+	font-weight: normal;
+}
+body {
+	margin: 0;			
+}
+button {
+	font-family: Superscript;
+	font-size: 20pt;
+	background-color: white;			
+	border-width: 1px;
+	border-color: black;
+	border-style: solid;
+	margin: 5px;
+	cursor: pointer;
+}
+h1, h2 {
+	font-family: Superscript;
+	font-weight: normal;			
+}
+#container{
+	margin: 5px;
+}		
+#game {
+	border-width: 1px;
+	border-color: black;
+	border-style: solid;
+	width: 400px;
+	height: 600px;
+}
+#blog, #credits {
+	font-family: Courier, monospace;
+	font-size: 9pt;
+	font-weight: normal;
+	border-width: 1px;
+	border-color: black;
+	border-style: solid;
+	padding: 5px;
+	display: none;
+	width: 400px;
+	height: 600px;
+	overflow: scroll;
+}
+
+.blogimg {
+	width: 234px;
+	height: 570px;
+	image-rendering: pixelated;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+#writepost {
+	width: 320px;
+	height: 150px;
+	position: absolute;
+	top: 300px;
+	left:50px;
+	padding: 5px;
+	border-width: 1px;
+	border-color: black;
+	border-style: solid;
+	background-color: white;
+}
+.entry img {
+	width: 20px;
+	height: 20px;
+}
+#x{
+	position: relative;
+	left: 0px;
+}
