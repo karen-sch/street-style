@@ -3,65 +3,15 @@
 <head> 
 	<meta charset="UTF-8" />
 	<title>StreetStyle</title>
+	<link rel="stylesheet" href="emojiarea/jquery.emojiarea.css">
+	<link rel="stylesheet" href="emojiarea/fontello/css/fontello.css">
+	<link rel="stylesheet" href="style.css">
 	<script src="//cdn.jsdelivr.net/phaser/2.4.3/phaser.min.js"></script>
 	<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="emojiarea/jquery.emojiarea.min.js"></script>
+	<script src="emojiarea/packs/basic/emojis.js"></script>
 	<script src="assets.json"></script>
-	<style type="text/css">
-		@font-face {
-			font-family: Superscript;
-			src: url(SUPERSCR.TTF);
-			font-weight: normal;
-		}
-		body {
-			margin: 0;			
-		}
-		button {
-			font-family: Superscript;
-			font-size: 20pt;
-			background-color: white;			
-			border-width: 1px;
-			border-color: black;
-			border-style: solid;
-			margin: 5px;
-			cursor: pointer;
-		}
-		h1 {
-			font-family: Superscript;
-			font-weight: normal;			
-		}
-		#container{
-			margin: 5px;
-		}		
-		#game {
-			border-width: 1px;
-			border-color: black;
-			border-style: solid;
-			width: 400px;
-			height: 600px;
-		}
-		#blog {
-			font-family: Courier, monospace;
-			font-size: 9pt;
-			font-weight: normal;
-			border-width: 1px;
-			border-color: black;
-			border-style: solid;
-			padding: 5px;
-			display: none;
-			width: 400px;
-			height: 600px;
-			overflow: scroll;
-		}
-		
-		.blogimg {
-			width: 234px;
-			height: 570px;
-			image-rendering: pixelated;
-			display: block;
-			margin-left: auto;
-			margin-right: auto;
-		}
-	</style>
+	<script src="game.js"></script>
 </head>
 <body>
 	<table id="container">
@@ -83,141 +33,5 @@
 			</tr>
 		</td>
 	</table>
-	<script type="text/javascript">
-		var menu, front_layer, back_layer, emojiCursor, cameraSound;
-		var imagedata = JSON.parse(data);
-		var width = 400;
-		var height = 600;
-		var menuHeight = 75;		
-		var game = new Phaser.Game(width, height, Phaser.AUTO, 'game', { preload: preload, create: create, update: update}, true, false);
-		var npc = {};
-		var initialScale = 0;
-		var initialX = 95;
-		var initialY = -400;
-		var hover = false;
-		var fashionPhrases = ["Tres chic!", "So stylish", "<3 this look", "Cool outfit!", "Very hip"];
-
-		$("#toggle_blog").click(function() {
-			$( "#blog, #game" ).toggle();
-			$("#toggle_blog").text($("#blog").is(":visible") ? "Street" : "Blog");
-			
-		});
-
-		function createRandomSprite(type){
-			object = imagedata[type];
-			var index = Math.floor((Math.random() * object.length));
-			var frame1 = type + '/' + (index + 1) + '/' + object[index]["1"];
-			var frame2 = type + '/' + (index + 1) + '/' + object[index]["2"];
-			var sprite = back_layer.create(initialX, initialY, 'fashion', frame1);
-			sprite.scale.setTo(initialScale, initialScale);
-			sprite.animations.add('walk', [frame1, frame2], 2.5, true, false);
-			sprite.animations.play('walk');
-			sprite.name = type;
-			return sprite;
-		}
-
-
-		function newNPC(){
-			var npc = {};
-			var spriteGroup = game.add.group();
-			back_layer.add(spriteGroup);
-			spriteGroup.add(createRandomSprite('body'));
-			spriteGroup.add(createRandomSprite('hair'));
-
-			var random = Math.floor((Math.random() * 2));
-			if (random == 0){
-				spriteGroup.add(createRandomSprite('jumpsuits'));
-			}
-			else {
-				spriteGroup.add(createRandomSprite('pants'));
-				spriteGroup.add(createRandomSprite('tops'));		
-			}
-
-			spriteGroup.add(createRandomSprite('shoes'));
-			spriteGroup.forEach(function(item) {
-				item.inputEnabled = true;
-				item.input.useHandCursor = true; 
-				item.events.onInputOver.add(function(){
-					hover = true;
-					emojiCursor.visible = true;
-				}, this);
-				item.events.onInputOut.add(function(){
-					hover = false;
-					emojiCursor.visible = false;
-				}, this);
-				item.events.onInputDown.add(clickOnStyle, this);			   
-			}, this);
-
-			npc.x = initialX;
-			npc.y = initialY;
-			npc.scale = initialScale;
-			npc.sprites = spriteGroup;
-			npc.blogged = false;
-			return npc;
-		}
-
-		function clickOnStyle(){
-			if (npc.blogged){
-				return;
-			}
-			cameraSound.play();
-			text = new Phaser.BitmapText(game, 10, 200, "superscript", "I love your\noutfit!", 30);
-			game.time.events.add(1000, text.destroy, text);
-			front_layer.add(text);
-			var bitmap = new Phaser.BitmapData(game, "bitmap", 78, 190);
-			npc.sprites.forEach(function(item) {
-				item.y = 0;
-				item.x = 0;
-				item.scale.setTo(1, 1);
-				bitmap.draw(item);
-				item.y = npc.y;
-				item.x = npc.x;
-				item.scale.setTo(npc.scale, npc.scale);
-			}, this);
-			var data = bitmap.baseTexture.source;
-			var test = data.toDataURL("image/png");
-			var index = Math.floor((Math.random() * fashionPhrases.length));
-			$("#blog").append("<div><h1>" + fashionPhrases[index] + "</h1><h3>Posted on "
-				+ new Date($.now()) + "</h3><img class='blogimg' src='"
-				+ test + "' /></div>");
-			npc.blogged = true;
-		}
-
-		function preload() {
-			game.load.atlasJSONHash('fashion', 'images/fashion.png', 'images/fashion.json');
-			game.load.spritesheet('emojis', 'images/emojis/sheet_apple_32.png', 32, 32, 1186);
-			game.load.bitmapFont('superscript', 'font/superscript.png', 'font/superscript.fnt');
-			game.load.audio('camera', '166500__thompsonman__camera-shutter.wav');
-		}
-
-		function create() {	
-			back_layer = game.add.group();
-			front_layer = game.add.group();
-			cameraSound = game.add.audio('camera');
-			emojiCursor = front_layer.create(0, 0, 'emojis', 93);
-			emojiCursor.visible = false;
-			npc= newNPC();
-		}
-
-		function update() {
-			if (!hover){				
-				npc.y += 1.5;
-				npc.scale = (((npc.y)/height)*(1.5))+3;
-				npc.sprites.forEach(function(item) {
-					item.y = npc.y;
-					item.scale.setTo(npc.scale, npc.scale);
-				}, this);
-
-				if (npc.y > height){
-					npc = newNPC();
-				}
-			}
-			else {
-				emojiCursor.x = game.input.x;
-				emojiCursor.y = game.input.y;
-			}
-		}
-	</script>
-
 </body>
 </html>
