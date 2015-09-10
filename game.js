@@ -87,7 +87,7 @@ $( document ).ready(function() {
 	}
 
 	function clickOnStyle(){
-		if (npc.blogged){
+		if (npc.blogged || writing){
 			return;
 		}
 		writing = true;
