@@ -1,9 +1,9 @@
-$( document ).ready(function() {
+$(document).ready(function() {
 	var menu, front_layer, back_layer, emojiCursor, cameraSound;
 	var imagedata = JSON.parse(data);
 	var width = 400;
 	var height = 600;
-	var menuHeight = 75;		
+	var menuHeight = 75;
 	var game = new Phaser.Game(width, height, Phaser.AUTO, 'game', { preload: preload, create: create, update: update}, true, false);
 	var npc = {};
 	var initialScale = 0;
@@ -13,6 +13,7 @@ $( document ).ready(function() {
 	var writing = false;
 	var fashionPhrases = ["Tres chic!", "So stylish", "<3 this look", "Cool outfit!", "Very hip"];
 
+	// Tabs
 	$("#toggle_street").click(function() {
 		$("#blog").hide();
 		$("#credits").hide();
@@ -20,7 +21,6 @@ $( document ).ready(function() {
 	});
 
 	$("#toggle_blog").click(function() {
-		
 		$("#game").hide();
 		$("#credits").hide();
 		$("#blog").show()
@@ -54,19 +54,20 @@ $( document ).ready(function() {
 		spriteGroup.add(createRandomSprite('body'));
 		spriteGroup.add(createRandomSprite('hair'));
 
+		// randomly decide if jumpsuit or pants/top
 		var random = Math.floor((Math.random() * 2));
 		if (random == 0){
 			spriteGroup.add(createRandomSprite('jumpsuits'));
 		}
 		else {
 			spriteGroup.add(createRandomSprite('pants'));
-			spriteGroup.add(createRandomSprite('tops'));		
+			spriteGroup.add(createRandomSprite('tops'));
 		}
 
 		spriteGroup.add(createRandomSprite('shoes'));
 		spriteGroup.forEach(function(item) {
 			item.inputEnabled = true;
-			item.input.useHandCursor = true; 
+			item.input.useHandCursor = true;
 			item.events.onInputOver.add(function(){
 				hover = true;
 				emojiCursor.visible = true;
@@ -75,7 +76,7 @@ $( document ).ready(function() {
 				hover = false;
 				emojiCursor.visible = false;
 			}, this);
-			item.events.onInputDown.add(clickOnStyle, this);			   
+			item.events.onInputDown.add(clickOnStyle, this);
 		}, this);
 
 		npc.x = initialX;
@@ -105,16 +106,24 @@ $( document ).ready(function() {
 			item.x = npc.x;
 			item.scale.setTo(npc.scale, npc.scale);
 		}, this);
-		var data = bitmap.baseTexture.source;
-		var test = data.toDataURL("image/png");
-		var index = Math.floor((Math.random() * fashionPhrases.length));
-		$('body').append("<div id='writepost'><h2>Write a blog post!</h2><form><textarea rows='5' class='emojis-wysiwyg'></textarea></form><button id='emojibutton'>Emoji</button><button id='post'>Post</button><button id='cancel'>Cancel</button></div>");
+
+		$('body').append("<div id='writepost'><h2>Write a blog post!</h2>"
+		+	"<form><textarea rows='5' class='emojis-wysiwyg'></textarea></form>"
+		+	"<button id='emojibutton'>Emoji</button><button id='post'>Post</button>"
+		+	"<button id='cancel'>Cancel</button></div>");
 		$('.emojis-wysiwyg').emojiarea({wysiwyg: true, button: '#emojibutton'});
 		$('#post').click(function(){
+			// Post the blog entry
 			var entry = $('.emoji-wysiwyg-editor').html();
-			$("#blog").append("<div><h1>" + fashionPhrases[index] + "</h1><h3>Posted on "
-				+ new Date($.now()) + "</h3><div class='entry'>" + entry + "</div><img class='blogimg' src='"
-				+ test + "' /></div>");
+			var data = bitmap.baseTexture.source;
+			var image = data.toDataURL("image/png");
+			var index = Math.floor((Math.random() * fashionPhrases.length));
+
+			$("#blog").append("<div><h1>" + fashionPhrases[index]
+			+ "</h1><h3>Posted on "
+			+ new Date($.now()) + "</h3><div class='entry'>" + entry
+			+ "</div><img class='blogimg' src='"
+			+ image + "' /></div>");
 			$('#writepost').remove();
 			npc.blogged = true;
 			writing = false;
@@ -122,7 +131,7 @@ $( document ).ready(function() {
 		$('#cancel').click(function(){
 			$('#writepost').remove();
 			writing = false;
-		});	
+		});
 
 	}
 
@@ -133,7 +142,7 @@ $( document ).ready(function() {
 		game.load.image('emojiCursor', 'emojiarea/packs/basic/images/camera.png')
 	}
 
-	function create() {	
+	function create() {
 		back_layer = game.add.group();
 		front_layer = game.add.group();
 		cameraSound = game.add.audio('camera');
@@ -144,7 +153,7 @@ $( document ).ready(function() {
 	}
 
 	function update() {
-		if (!hover && !writing){				
+		if (!hover && !writing){
 			npc.y += 1.5;
 			npc.scale = (((npc.y)/height)*(1.5))+3;
 			npc.sprites.forEach(function(item) {
@@ -152,6 +161,7 @@ $( document ).ready(function() {
 				item.scale.setTo(npc.scale, npc.scale);
 			}, this);
 
+			// new NPC if out of frame
 			if (npc.y > height){
 				npc = newNPC();
 			}
